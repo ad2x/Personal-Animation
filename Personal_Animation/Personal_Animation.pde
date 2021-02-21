@@ -29,36 +29,59 @@ float NeptuneDeg;
 //Colours
 color Red = #FF0000;
 color Green = #00FF00;
+
 color Volume;
+color Pause;
+color FF;
+
+//Pause state
+int PauseToggle;
+
+//Fast forward state
+int FFToggle;
 
 void setup() {//---------------------------------------------------
-  size(1600, 1400);
+  size(1500, 1400);
   
   //Setting up minim + song
   minim = new Minim(this);
-  song = minim.loadFile("Wes Montgomery Trio - Days of Wine and Roses.mp3");
+  song = minim.loadFile("Wes Montgomery Trio - Days of Wine and Roses.mp3"); //I'm assuming you can use copyrighted songs in a school project? Either way you can see the name and artist so I'm giving credit
   song.play();
-  song.shiftGain(song.getGain(),-15, 100);
+  song.shiftGain(song.getGain(),-15, 100); //Using getVolume gave me an error message (as with setGain) so I was forced to use this instead :/
     
   //Define base planet speed
   EarthSpeed = 0.015;
   
   //Initial volume state
   Volume = Green;
+  
+  //Initial pause state
+  Pause = Green;
+  
+  //Initial fast forward state
+  FF = Red;
+  
+  //Pause variable
+  PauseToggle = 1;
+  
+  //Fast forward variable - 1 = Off, 8 = On
+  FFToggle = 1;
 } //---------------------------------------------------
 
 void draw() { //---------------------------------------------------
   background(0);  
     
-  //Planet rotation vars
-  MercuryDeg = MercuryDeg + EarthSpeed * 4.2;
-  VenusDeg = VenusDeg + EarthSpeed * 1.6;
-  EarthDeg = EarthDeg + EarthSpeed;
-  MarsDeg = MarsDeg + EarthSpeed * 0.532;
-  JupiterDeg = JupiterDeg + EarthSpeed * 0.084;
-  SaturnDeg = SaturnDeg + EarthSpeed * 0.034;
-  UranusDeg = UranusDeg + EarthSpeed * 0.012;
-  NeptuneDeg = NeptuneDeg + EarthSpeed * 0.006;
+  //Planet rotation vars - EarthSpeed for a base value, second value is their speed relative to earth, and PauseToggle so the animation can be paused
+  if (PauseToggle == 1) {
+    MercuryDeg = MercuryDeg + EarthSpeed * 4.2 * FFToggle;
+    VenusDeg = VenusDeg + EarthSpeed * 1.6 * FFToggle;
+    EarthDeg = EarthDeg + EarthSpeed * FFToggle;
+    MarsDeg = MarsDeg + EarthSpeed * 0.532 * FFToggle;
+    JupiterDeg = JupiterDeg + EarthSpeed * 0.084 * FFToggle;
+    SaturnDeg = SaturnDeg + EarthSpeed * 0.034 * FFToggle;
+    UranusDeg = UranusDeg + EarthSpeed * 0.012 * FFToggle;
+    NeptuneDeg = NeptuneDeg + EarthSpeed * 0.006 * FFToggle;
+  }
   
   
   //Layer order ------
@@ -85,7 +108,9 @@ void draw() { //---------------------------------------------------
   Neptune(700, 700);
   
   //UI
-  VolumeButton();
+  VolumeButton(1250, 100);
+  PauseButton(1400, 100);
+  FFButton(1400, 250);
   
 } //---------------------------------------------------
 
@@ -291,21 +316,66 @@ void NeptunePath() {
   ellipse(700, 700, 1390, 1390);
 }
 
-void VolumeButton() {
+void VolumeButton(int x, int y) {
+  pushMatrix();
+  translate(x, y);
+  
   //Button background
   strokeWeight(3);
   stroke(230);
   fill(255);
   
-  ellipse(1250, 100, 100, 100);
+  ellipse(0, 0, 100, 100);
   
   //Mute icon
   strokeWeight(8);
   stroke(Volume + 20);
   fill(Volume);
   
-  line(1225, 75, 1275, 125);
-  line(1275, 75, 1225, 125);
+  line(-25, -25, 25, 25);
+  line(25, -25, -25, 25);
+  
+  popMatrix();
+}
+
+void PauseButton(int x, int y) {
+  pushMatrix();
+  translate(x, y);
+  
+  //Button background
+  strokeWeight(3);
+  stroke(230);
+  fill(255);
+  ellipse(0, 0, 100, 100);
+  
+  //Pause icon
+  strokeWeight(8);
+  stroke(Pause + 20);
+  fill(Pause);
+  line(-20, -25, -20, 25);
+  line(20, -25, 20, 25);
+  
+  popMatrix();
+}
+
+void FFButton(int x, int y) { //Fast forward
+  pushMatrix();
+  translate(x, y);
+  
+  //Button background
+  strokeWeight(3);
+  stroke(230);
+  fill(255);
+  ellipse(0, 0, 100, 100);
+  
+  //FF icon
+  strokeWeight(3);
+  stroke(FF + 20);
+  fill(FF);
+  triangle(-25, -25, 0, 0, -25, 25);
+  triangle(0, -25, 25, 0, 0, 25);
+  
+  popMatrix();
 }
 
 void mouseReleased() {
@@ -316,5 +386,23 @@ void mouseReleased() {
   } else if (dist(1250, 100, mouseX, mouseY) < 50 && Volume == Red) {
     Volume = Green;
     song.shiftGain(song.getGain(),-40, 100);
+  }
+  
+  //Pause and unpause
+  if (dist(1400, 100, mouseX, mouseY) < 50 && Pause == Green) {
+    Pause = Red;
+    PauseToggle = 0;
+  } else if (dist(1400, 100, mouseX, mouseY) <50 && Pause == Red) {
+    Pause = Green;
+    PauseToggle = 1;
+  }
+  
+  //Toggle fast forward mode
+  if (dist(1400, 250, mouseX, mouseY) < 50 && FF == Red) {
+    FF = Green;
+    FFToggle = 8;
+  } else if (dist(1400, 250, mouseX, mouseY) < 50 && FF == Green) {
+    FF = Red;
+    FFToggle = 1;
   }
 }
