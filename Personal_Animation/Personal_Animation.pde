@@ -1,9 +1,13 @@
+//Import minim stuff
 import ddf.minim.*;
 import ddf.minim.analysis.*;
 import ddf.minim.effects.*;
 import ddf.minim.signals.*;
 import ddf.minim.spi.*;
 import ddf.minim.ugens.*;
+
+//Import math stuff
+import java.util.*;
 
 Minim minim;
 AudioPlayer song;
@@ -29,6 +33,7 @@ float NeptuneDeg;
 //Colours
 color Red = #FF0000;
 color Green = #00FF00;
+color Blue = #0000FF;
 
 color Volume;
 color Pause;
@@ -40,38 +45,51 @@ int PauseToggle;
 //Fast forward state
 int FFToggle;
 
+//Variables for the x and y coords of Earth for the purpose of making it into a button
+float EarthX, EarthY;
+
+//Planet textbox toggles
+int EarthCheck;
+
+//Planet textbox coords
+float EarthTX, EarthTY;
+
 void setup() {//---------------------------------------------------
   size(1500, 1400);
   
-  //Setting up minim + song
+//Setting up minim + song
   minim = new Minim(this);
   song = minim.loadFile("Wes Montgomery Trio - Days of Wine and Roses.mp3"); //I'm assuming you can use copyrighted songs in a school project? Either way you can see the name and artist so I'm giving credit
   song.play();
   song.shiftGain(song.getGain(),-15, 100); //Using getVolume gave me an error message (as with setGain) so I was forced to use this instead :/
     
-  //Define base planet speed
+//Define base planet speed
   EarthSpeed = 0.015;
   
-  //Initial volume state
+//Initial volume state
   Volume = Green;
   
-  //Initial pause state
+//Initial pause state
   Pause = Green;
   
-  //Initial fast forward state
+//Initial fast forward state
   FF = Red;
   
-  //Pause variable
+//Pause variable
   PauseToggle = 1;
   
-  //Fast forward variable - 1 = Off, 8 = On
+//Fast forward variable - 1 = Off, 8 = On
   FFToggle = 1;
+  
+//Planet click toggles
+  EarthCheck = 0;
+  
 } //---------------------------------------------------
 
 void draw() { //---------------------------------------------------
   background(0);  
-    
-  //Planet rotation vars - EarthSpeed for a base value, second value is their speed relative to earth, and PauseToggle so the animation can be paused
+
+//Planet rotation vars - EarthSpeed for a base value, second value is their speed relative to earth, and PauseToggle so the animation can be paused
   if (PauseToggle == 1) {
     MercuryDeg = MercuryDeg + EarthSpeed * 4.2 * FFToggle;
     VenusDeg = VenusDeg + EarthSpeed * 1.6 * FFToggle;
@@ -83,10 +101,16 @@ void draw() { //---------------------------------------------------
     NeptuneDeg = NeptuneDeg + EarthSpeed * 0.006 * FFToggle;
   }
   
+//=================================================================
+//===================== Planet coord calcs for buttons ============
+
+  //Earth
+  EarthXCalc(EarthDeg);
+  EarthYCalc(EarthDeg);
   
-  //Layer order ------
+//Layer order ------
   
-  //Paths
+//Paths
   NeptunePath();
   UranusPath();
   SaturnPath();
@@ -107,12 +131,23 @@ void draw() { //---------------------------------------------------
   Uranus(700, 700);
   Neptune(700, 700);
   
-  //UI
+//UI
   VolumeButton(1250, 100);
   PauseButton(1400, 100);
   FFButton(1400, 250);
   
+//=================================================================
+//===================== Button textbox click checks ===============
+
+  //Earth
+  if (EarthCheck == 1 && PauseToggle == 0) {
+    EarthText(EarthX + 700, EarthY + 700);
+  }
+  
 } //---------------------------------------------------
+
+//============================================================
+//============= PLANETS + RESPECTIVE PATHS ===================
 
 void Sun() {
   strokeWeight(8);
@@ -316,6 +351,9 @@ void NeptunePath() {
   ellipse(700, 700, 1390, 1390);
 }
 
+//=========================================================================================================
+//======================= UI BUTTTONS =====================================================================
+
 void VolumeButton(int x, int y) {
   pushMatrix();
   translate(x, y);
@@ -378,7 +416,45 @@ void FFButton(int x, int y) { //Fast forward
   popMatrix();
 }
 
+//==============================================================================
+//===================== CALCULATE PLANET COORDS ================================
+
+//Calculate Earths coordinates in order to make it a button
+float EarthXCalc (float rad) {  
+  EarthX = (float) Math.cos(rad) * 230;
+  return EarthX;
+}
+
+float EarthYCalc (float rad) {
+  EarthY = (float) Math.sin(rad) * 230;
+  return EarthY;
+}
+
+//==============================================================================
+//===================== PLANET TEXT BOXES ======================================
+
+void EarthText(float x, float y) {
+  pushMatrix();
+  translate(x, y);
+  
+  strokeWeight(15);
+  stroke(225);
+  fill(255);
+  
+  rect(0, 0, 400, 400, 0, 50, 50, 50);
+  
+  popMatrix();
+}
+
+
+//==============================================================================
+//===================== IF STATEMENTS ON CLICK =================================
+
 void mouseReleased() {
+  
+//==============================================================================
+//=========================== UI STUFF =========================================
+  
   //Only way I could figure out to toggle the music
   if (dist(1250, 100, mouseX, mouseY) < 50 && Volume == Green) {
     Volume = Red;
@@ -402,7 +478,20 @@ void mouseReleased() {
     FF = Green;
     FFToggle = 8;
   } else if (dist(1400, 250, mouseX, mouseY) < 50 && FF == Green) {
+    FF = Blue;
+    FFToggle = 64;
+  } else if (dist(1400, 250, mouseX, mouseY) < 50 && FF == Blue) {
     FF = Red;
     FFToggle = 1;
+  }
+  
+//==============================================================================
+//========================== PLANET BUTTONS ====================================
+  
+  //Earth
+  if (dist(EarthX, EarthY, mouseX - 700, mouseY - 700) < 50) {
+    EarthCheck = 1;
+  } else if (dist(EarthX, EarthY, mouseX - 700, mouseY - 700) > 50) {
+    EarthCheck = 0;
   }
 }
