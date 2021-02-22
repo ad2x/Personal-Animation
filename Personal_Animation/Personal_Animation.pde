@@ -16,19 +16,29 @@ AudioPlayer song;
 //Feb 20 2021
 //1-4b
 
+
+//List of things:
+// - Planets orbiting
+// - Mute and unmute button
+// - Pause and unpause button
+// - 3 speed modes
+// - Ability to click on planets to see info 
+// - Turns computer into heater 
+
+
 //Base planet speed to keep all of the planets speeds relative (I used Earths speed as the reference)
 //I used this site(https://space-facts.com/planet-orbits/) for the actual relative orbit speeds
 float EarthSpeed;
 
-// Rotation angles of planets
-float MercuryDeg;
-float VenusDeg;
-float EarthDeg;
-float MarsDeg;
-float JupiterDeg;
-float SaturnDeg;
-float UranusDeg;
-float NeptuneDeg;
+// Rotation angles of planets 
+float MercuryRad;
+float VenusRad;
+float EarthRad;
+float MarsRad;
+float JupiterRad;
+float SaturnRad;
+float UranusRad;
+float NeptuneRad;
 
 //Colours
 color Red = #FF0000;
@@ -46,13 +56,25 @@ int PauseToggle;
 int FFToggle;
 
 //Variables for the x and y coords of Earth for the purpose of making it into a button
+float MercuryX, MercuryY;
+float VenusX, VenusY;
 float EarthX, EarthY;
+float MarsX, MarsY;
+float JupiterX, JupiterY;
+float SaturnX, SaturnY;
+float UranusX, UranusY;
+float NeptuneX, NeptuneY;
 
-//Planet textbox toggles
+//Planet (+ sun) textbox toggles
+int SunCheck;
+int MercuryCheck;
+int VenusCheck;
 int EarthCheck;
-
-//Planet textbox coords
-float EarthTX, EarthTY;
+int MarsCheck;
+int JupiterCheck;
+int SaturnCheck;
+int UranusCheck;
+int NeptuneCheck;
 
 void setup() {//---------------------------------------------------
   size(1500, 1400);
@@ -61,7 +83,7 @@ void setup() {//---------------------------------------------------
   minim = new Minim(this);
   song = minim.loadFile("Wes Montgomery Trio - Days of Wine and Roses.mp3"); //I'm assuming you can use copyrighted songs in a school project? Either way you can see the name and artist so I'm giving credit
   song.play();
-  song.shiftGain(song.getGain(),-15, 100); //Using getVolume gave me an error message (as with setGain) so I was forced to use this instead :/
+  song.shiftGain(song.getGain(),-15, 100); //getVolume and setGain don't work with certain versions of Processing :/ 
     
 //Define base planet speed
   EarthSpeed = 0.015;
@@ -81,9 +103,6 @@ void setup() {//---------------------------------------------------
 //Fast forward variable - 1 = Off, 8 = On
   FFToggle = 1;
   
-//Planet click toggles
-  EarthCheck = 0;
-  
 } //---------------------------------------------------
 
 void draw() { //---------------------------------------------------
@@ -91,22 +110,50 @@ void draw() { //---------------------------------------------------
 
 //Planet rotation vars - EarthSpeed for a base value, second value is their speed relative to earth, and PauseToggle so the animation can be paused
   if (PauseToggle == 1) {
-    MercuryDeg = MercuryDeg + EarthSpeed * 4.2 * FFToggle;
-    VenusDeg = VenusDeg + EarthSpeed * 1.6 * FFToggle;
-    EarthDeg = EarthDeg + EarthSpeed * FFToggle;
-    MarsDeg = MarsDeg + EarthSpeed * 0.532 * FFToggle;
-    JupiterDeg = JupiterDeg + EarthSpeed * 0.084 * FFToggle;
-    SaturnDeg = SaturnDeg + EarthSpeed * 0.034 * FFToggle;
-    UranusDeg = UranusDeg + EarthSpeed * 0.012 * FFToggle;
-    NeptuneDeg = NeptuneDeg + EarthSpeed * 0.006 * FFToggle;
+    MercuryRad = MercuryRad + EarthSpeed * 4.2 * FFToggle;
+    VenusRad = VenusRad + EarthSpeed * 1.6 * FFToggle;
+    EarthRad = EarthRad + EarthSpeed * FFToggle;
+    MarsRad = MarsRad + EarthSpeed * 0.532 * FFToggle;
+    JupiterRad = JupiterRad + EarthSpeed * 0.084 * FFToggle;
+    SaturnRad = SaturnRad + EarthSpeed * 0.034 * FFToggle;
+    UranusRad = UranusRad + EarthSpeed * 0.012 * FFToggle;
+    NeptuneRad = NeptuneRad + EarthSpeed * 0.006 * FFToggle;
   }
   
 //=================================================================
 //===================== Planet coord calcs for buttons ============
 
+  //Mercury
+  MercuryXCalc(MercuryRad);
+  MercuryYCalc(MercuryRad);
+  
+  //Venus
+  VenusXCalc(VenusRad);
+  VenusYCalc(VenusRad);
+
   //Earth
-  EarthXCalc(EarthDeg);
-  EarthYCalc(EarthDeg);
+  EarthXCalc(EarthRad);
+  EarthYCalc(EarthRad);
+  
+  //Mars
+  MarsXCalc(MarsRad);
+  MarsYCalc(MarsRad);
+  
+  //Jupiter
+  JupiterXCalc(JupiterRad);
+  JupiterYCalc(JupiterRad);
+  
+  //Saturn
+  SaturnXCalc(SaturnRad);
+  SaturnYCalc(SaturnRad);
+  
+  //Uranus
+  UranusXCalc(UranusRad);
+  UranusYCalc(UranusRad);
+  
+  //Neptune
+  NeptuneXCalc(NeptuneRad);
+  NeptuneYCalc(NeptuneRad);
   
 //Layer order ------
   
@@ -139,12 +186,54 @@ void draw() { //---------------------------------------------------
 //=================================================================
 //===================== Button textbox click checks ===============
 
+  //Sun
+  if (SunCheck == 1 && PauseToggle == 0) {
+    SunText(700, 700);
+  }
+
+  //Mercury
+  if (MercuryCheck == 1 && PauseToggle == 0) {
+    MercuryText(MercuryX + 700, MercuryY + 700);
+  }
+  
+  //Venus
+  if (VenusCheck == 1 && PauseToggle == 0) {
+    VenusText(VenusX + 700, VenusY + 700);
+  }
+
   //Earth
   if (EarthCheck == 1 && PauseToggle == 0) {
     EarthText(EarthX + 700, EarthY + 700);
   }
   
+  //Mars
+  if (MarsCheck == 1 && PauseToggle == 0) {
+    MarsText(MarsX + 700, MarsY + 700);
+  }
+  
+  //Jupiter
+  if (JupiterCheck == 1 && PauseToggle == 0) {
+    JupiterText(JupiterX + 700, JupiterY + 700);
+  }
+  
+  //Saturn
+  if (SaturnCheck == 1 && PauseToggle == 0) {
+    SaturnText(SaturnX + 700, SaturnY + 700);
+  }
+  
+  //Uranus
+  if (UranusCheck == 1 && PauseToggle == 0) {
+    UranusText(UranusX + 700, UranusY + 700);
+  }
+  
+  //Neptune
+  if (NeptuneCheck == 1 && PauseToggle == 0) {
+    NeptuneText(NeptuneX + 700, NeptuneY + 700);
+  }
+  
 } //---------------------------------------------------
+
+
 
 //============================================================
 //============= PLANETS + RESPECTIVE PATHS ===================
@@ -161,7 +250,7 @@ void Mercury(int x, int y) {
   pushMatrix();
   translate(x, y);
   
-  rotate(MercuryDeg);
+  rotate(MercuryRad);
   
   strokeWeight(4);
   stroke(165, 140, 100);
@@ -184,7 +273,7 @@ void Venus(int x, int y) {
   pushMatrix();
   translate(x, y);
   
-  rotate(VenusDeg);
+  rotate(VenusRad);
   
   strokeWeight(5);
   stroke(160, 150, 130);
@@ -207,7 +296,7 @@ void Earth(int x, int y) {
   pushMatrix();
   translate(x, y);
   
-  rotate(EarthDeg);
+  rotate(EarthRad);
   
   strokeWeight(5);
   stroke(2, 65, 200);
@@ -239,7 +328,7 @@ void Mars(int x, int y) {
   pushMatrix();
   translate(x, y);
   
-  rotate(MarsDeg);
+  rotate(MarsRad);
   
   strokeWeight(5);
   stroke(165, 50, 10);
@@ -262,7 +351,7 @@ void Jupiter(int x, int y) {
   pushMatrix();
   translate(700, 700);
   
-  rotate(JupiterDeg);
+  rotate(JupiterRad);
   
   strokeWeight(6);
   stroke(210, 200, 175);
@@ -285,7 +374,7 @@ void Saturn(int x, int y) {
   pushMatrix();
   translate(x, y);
   
-  rotate(SaturnDeg);
+  rotate(SaturnRad);
   
   strokeWeight(6);
   stroke(155, 100, 10);
@@ -309,7 +398,7 @@ void Uranus(int x, int y) {
   pushMatrix();
   translate(700, 700);
   
-  rotate(UranusDeg);
+  rotate(UranusRad);
   
   strokeWeight(5);
   stroke(5, 135, 147);
@@ -332,7 +421,7 @@ void Neptune(int x, int y) {
   pushMatrix();
   translate(700, 700);
   
-  rotate(NeptuneDeg);
+  rotate(NeptuneRad);
   
   strokeWeight(5);
   stroke(10, 30, 170);
@@ -419,6 +508,28 @@ void FFButton(int x, int y) { //Fast forward
 //==============================================================================
 //===================== CALCULATE PLANET COORDS ================================
 
+//Mercury
+float MercuryXCalc (float rad) {
+  MercuryX = (float) Math.cos(rad) * 105;
+  return MercuryX;
+}
+
+float MercuryYCalc (float rad) {
+  MercuryY = (float) Math.sin(rad) * 105;
+  return MercuryY;
+}
+
+//Venus
+float VenusXCalc (float rad) {
+  VenusX = (float) Math.cos(rad) * 160;
+  return VenusX;
+}
+
+float VenusYCalc (float rad) {
+  VenusY = (float) Math.sin(rad) * 160;
+  return VenusY;
+}
+
 //Calculate Earths coordinates in order to make it a button
 float EarthXCalc (float rad) {  
   EarthX = (float) Math.cos(rad) * 230;
@@ -430,8 +541,107 @@ float EarthYCalc (float rad) {
   return EarthY;
 }
 
+//Mars
+float MarsXCalc (float rad) {
+  MarsX = (float) Math.cos(rad) * 300;
+  return MarsX;
+}
+
+float MarsYCalc (float rad) {
+  MarsY = (float) Math.sin(rad) * 300;
+  return MarsY;
+}
+
+//Jupiter
+float JupiterXCalc (float rad) {
+  JupiterX = (float) Math.cos(rad) * 400;
+  return JupiterX;
+}
+
+float JupiterYCalc (float rad) {
+  JupiterY = (float) Math.sin(rad) * 400;
+  return JupiterY;
+}
+
+//Saturn
+float SaturnXCalc (float rad) {
+  SaturnX = (float) Math.cos(rad) * 515;
+  return SaturnX;
+}
+
+float SaturnYCalc (float rad) {
+  SaturnY = (float) Math.sin(rad) * 515;
+  return SaturnY;
+}
+
+//Uranus
+float UranusXCalc (float rad) {
+  UranusX = (float) Math.cos(rad) * 610;
+  return UranusX;
+}
+
+float UranusYCalc (float rad) {
+  UranusY = (float) Math.sin(rad) * 610;
+  return UranusY;
+}
+
+//Neptune
+float NeptuneXCalc (float rad) {
+  NeptuneX = (float) Math.cos(rad) * 695;
+  return NeptuneX;
+}
+
+float NeptuneYCalc (float rad) {
+  NeptuneY = (float) Math.sin(rad) * 695;
+  return NeptuneY;
+}
 //==============================================================================
 //===================== PLANET TEXT BOXES ======================================
+
+void SunText(float x, float y) {
+  pushMatrix();
+  translate(x, y);
+  
+  strokeWeight(15);
+  stroke(225);
+  fill(255);
+  
+  rect(0, 0, 400, 400, 0, 50, 50, 50);
+  
+  //----------
+  
+  popMatrix();
+}
+
+void MercuryText(float x, float y) {
+  pushMatrix();
+  translate(x, y);
+  
+  strokeWeight(15);
+  stroke(225);
+  fill(255);
+  
+  rect(0, 0, 400, 400, 0, 50, 50, 50);
+  
+  //----------
+  
+  popMatrix();
+}
+
+void VenusText(float x, float y) {
+  pushMatrix();
+  translate(x, y);
+  
+  strokeWeight(15);
+  stroke(225);
+  fill(255);
+  
+  rect(0, 0, 400, 400, 0, 50, 50, 50);
+  
+  //----------
+  
+  popMatrix();
+}
 
 void EarthText(float x, float y) {
   pushMatrix();
@@ -443,9 +653,85 @@ void EarthText(float x, float y) {
   
   rect(0, 0, 400, 400, 0, 50, 50, 50);
   
+  //----------
+  
   popMatrix();
 }
 
+void MarsText(float x, float y){
+  pushMatrix();
+  translate(x, y);
+  
+  strokeWeight(15);
+  stroke(225);
+  fill(255);
+  
+  rect(0, 0, 400, 400, 0, 50, 50, 50);
+  
+  //----------
+  
+  popMatrix();
+}
+
+void JupiterText(float x, float y) {
+  pushMatrix();
+  translate(x, y);
+  
+  strokeWeight(15);
+  stroke(225);
+  fill(255);
+  
+  rect(0, 0, 400, 400, 0, 50, 50, 50);
+  
+  //----------
+  
+  popMatrix();
+}
+
+void SaturnText(float x, float y) {
+  pushMatrix();
+  translate(x, y);
+  
+  strokeWeight(15);
+  stroke(225);
+  fill(255);
+  
+  rect(0, 0, 400, 400, 0, 50, 50, 50);
+  
+  //----------
+  
+  popMatrix();
+}
+
+void UranusText(float x, float y) {
+  pushMatrix();
+  translate(x, y);
+  
+  strokeWeight(15);
+  stroke(225);
+  fill(255);
+  
+  rect(0, 0, 400, 400, 0, 50, 50, 50);
+  
+  //----------
+  
+  popMatrix();
+}
+
+void NeptuneText(float x, float y) {
+  pushMatrix();
+  translate(x, y);
+  
+  strokeWeight(15);
+  stroke(225);
+  fill(255);
+  
+  rect(0, 0, 400, 400, 0, 50, 50, 50);
+  
+  //----------
+  
+  popMatrix();
+}
 
 //==============================================================================
 //===================== IF STATEMENTS ON CLICK =================================
@@ -487,11 +773,67 @@ void mouseReleased() {
   
 //==============================================================================
 //========================== PLANET BUTTONS ====================================
+
+  //Sun
+  if (dist(700, 700, mouseX, mouseY) < 75) {
+    SunCheck = 1;
+  } else if (dist(700, 700, mouseX, mouseY) > 75) {
+    SunCheck = 0;
+  }
+
+  //Mercury
+  if (dist(MercuryX, MercuryY, mouseX - 700, mouseY - 700) < 17.5) {
+    MercuryCheck = 1;
+  } else if (dist(MercuryX, MercuryY, mouseX - 700, mouseY - 700) > 17.5) {
+    MercuryCheck = 0;
+  }
+  
+  //Venus
+  if (dist(VenusX, VenusY, mouseX - 700, mouseY - 700) < 25) {
+    VenusCheck = 1;
+  } else if (dist(VenusX, VenusY, mouseX - 700, mouseY - 700) > 25) {
+    VenusCheck = 0;
+  }
   
   //Earth
-  if (dist(EarthX, EarthY, mouseX - 700, mouseY - 700) < 50) {
+  if (dist(EarthX, EarthY, mouseX - 700, mouseY - 700) < 27.5) {
     EarthCheck = 1;
-  } else if (dist(EarthX, EarthY, mouseX - 700, mouseY - 700) > 50) {
+  } else if (dist(EarthX, EarthY, mouseX - 700, mouseY - 700) > 27.5) {
     EarthCheck = 0;
+  }
+  
+  //Mars
+  if (dist(MarsX, MarsY, mouseX - 700, mouseY - 700) < 28.5) {
+    MarsCheck = 1;
+  } else if (dist(MarsX, MarsY, mouseX - 700, mouseY - 700) > 28.5) {
+    MarsCheck = 0;
+  }
+  
+  //Jupiter
+  if (dist(JupiterX, JupiterY, mouseX - 700, mouseY - 700) < 55) {
+    JupiterCheck = 1;
+  } else if (dist(JupiterX, JupiterY, mouseX - 700, mouseY - 700) > 55) {
+    JupiterCheck = 0;
+  }
+  
+  //Saturn
+  if (dist(SaturnX, SaturnY, mouseX - 700, mouseY - 700) < 47.5) {
+    SaturnCheck = 1;
+  } else if (dist(SaturnX, SaturnY, mouseX - 700, mouseY -700) > 47.5) {
+    SaturnCheck = 0;
+  }
+  
+  //Uranus
+  if (dist(UranusX, UranusY, mouseX - 700, mouseY - 700) < 37.5) {
+    UranusCheck = 1;
+  } else if (dist(UranusX, UranusY, mouseX - 700, mouseY - 700) > 37.5) {
+    UranusCheck = 0;
+  }
+  
+  //Neptune
+  if (dist(NeptuneX, NeptuneY, mouseX - 700, mouseY - 700) < 35) {
+    NeptuneCheck = 1;
+  } else if (dist(NeptuneX, NeptuneY, mouseX - 700, mouseY - 700) > 35) {
+    NeptuneCheck = 0;
   }
 }
